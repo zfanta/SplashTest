@@ -8,7 +8,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -17,6 +17,7 @@ import {
   Text,
   useColorScheme,
   View,
+  Modal,
 } from 'react-native';
 
 import {
@@ -26,6 +27,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+import LottieView from 'lottie-react-native';
 
 const Section: React.FC<{
   title: string;
@@ -112,4 +115,48 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+interface SplashScreenProps {
+  visible: boolean
+  setAnimationFinished: React.Dispatch<React.SetStateAction<boolean>>
+}
+const SplashScreen = ({visible, setAnimationFinished}: SplashScreenProps) => {
+  return (
+    <Modal visible={visible} statusBarTranslucent={true}>
+      <LottieView
+        source={require('./loading.json')}
+        resizeMode="cover"
+        loop={false}
+        autoPlay={true}
+        colorFilters={[
+          {
+            keypath: 'White Solid 1',
+            color: '#3283C5',
+          },
+        ]}
+        onAnimationFinish={() => setAnimationFinished(true)}
+      />
+    </Modal>
+  );
+};
+
+export default () => {
+  const [appLoading, setAppLoading] = useState(true);
+  const [animationFinished, setAnimationFinished] = useState(false);
+  const [modalVisible, setModalVisible] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setAppLoading(false);
+    }, Math.random() * (10000 - 1000) + 1000);
+  }, []);
+
+  useEffect(() => {
+    setModalVisible(appLoading || !animationFinished);
+  }, [animationFinished, appLoading]);
+
+  if (modalVisible) {
+    return <SplashScreen visible={modalVisible} setAnimationFinished={setAnimationFinished} />;
+  } else {
+    return <App />;
+  }
+};
